@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
 const app = express()
@@ -42,61 +42,76 @@ async function run() {
   try {
     await client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
-    // const orderCollection = client.db('toolsMenu').collection('orders');
+    const orderCollection = client.db('Manufacturer').collection('orders');
     // const userCollection = client.db('toolsMenu').collection('users');
     // const reviewCollection = client.db('toolsMenu').collection('reviews');
     // const profileCollection = client.db('toolsMenu').collection('profiles');
     // const paymentCollection = client.db('toolsMenu').collection('payments');
     // Verify Admin
 
-  //   const verifyAdmin = async (req, res, next) => {
-  //     const requester = req.decoded.email;
-  //     const requesterAccount = await userCollection.findOne({ email: requester });
-  //     if (requesterAccount.role === "admin") {
-  //       next();
-  //     }
-  //     else {
-  //       res.status(403).send({ message: 'forbidden' });
-  //     }
-  //   }
+    //   const verifyAdmin = async (req, res, next) => {
+    //     const requester = req.decoded.email;
+    //     const requesterAccount = await userCollection.findOne({ email: requester });
+    //     if (requesterAccount.role === "admin") {
+    //       next();
+    //     }
+    //     else {
+    //       res.status(403).send({ message: 'forbidden' });
+    //     }
+    //   }
 
 
-  //   // Payment Api and Verify
-  //   app.post('/create-payment-intent', verifyJWT, async (req, res) => {
-  //     const service = req.body;
-  //     const price = service.price;
-  //     const amount = price * 100;
-  //     const paymentIntent = await stripe.paymentIntents.create({
-  //       amount: amount,
-  //       currency: 'usd',
-  //       payment_method_types: ['card']
-  //     });
-  //     res.send({ clientSecret: paymentIntent.client_secret })
-  //   });
+    //   // Payment Api and Verify
+    //   app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+    //     const service = req.body;
+    //     const price = service.price;
+    //     const amount = price * 100;
+    //     const paymentIntent = await stripe.paymentIntents.create({
+    //       amount: amount,
+    //       currency: 'usd',
+    //       payment_method_types: ['card']
+    //     });
+    //     res.send({ clientSecret: paymentIntent.client_secret })
+    //   });
 
-  // // Payment Update
-  // app.patch('/orders/:id', verifyJWT, async(req, res) =>{
-  //   const id  = req.params.id;
-  //   const payment = req.body;
-  //   const filter = {_id: ObjectId(id)};
-  //   const updatedDoc = {
-  //     $set: {
-  //       paid: true,
-  //       transactionId: payment.transactionId
-  //     }
-  //   }
+    // // Payment Update
+    // app.patch('/orders/:id', verifyJWT, async(req, res) =>{
+    //   const id  = req.params.id;
+    //   const payment = req.body;
+    //   const filter = {_id: ObjectId(id)};
+    //   const updatedDoc = {
+    //     $set: {
+    //       paid: true,
+    //       transactionId: payment.transactionId
+    //     }
+    //   }
 
-  //   const result = await paymentCollection.insertOne(payment);
-  //   const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
-  //   res.send(updatedOrder);
-  // })
+    //   const result = await paymentCollection.insertOne(payment);
+    //   const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+    //   res.send(updatedOrder);
+    // })
 
 
     // Get All Tools
-    console.log("Coooooooo")
-
     app.get("/tools", async (req, res) => {
       const result = await toolsCollection.find().toArray();
+      res.send(result)
+    })
+
+    // Specifice Id Tools
+    app.get("/tool/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const tools = await toolsCollection.findOne(filter);
+      res.send(tools);
+    })
+
+
+    // User Order Data
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      // const query = { email: order.email }
+      const result = await orderCollection.insertOne(order);
       res.send(result)
     })
 
