@@ -43,9 +43,9 @@ async function run() {
     await client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
     const orderCollection = client.db('Manufacturer').collection('orders');
+    const reviewCollection = client.db('Manufacturer').collection('reviews');
+    const profileCollection = client.db('Manufacturer').collection('profiles');
     // const userCollection = client.db('toolsMenu').collection('users');
-    // const reviewCollection = client.db('toolsMenu').collection('reviews');
-    // const profileCollection = client.db('toolsMenu').collection('profiles');
     // const paymentCollection = client.db('toolsMenu').collection('payments');
     // Verify Admin
 
@@ -112,6 +112,41 @@ async function run() {
       const order = req.body;
       // const query = { email: order.email }
       const result = await orderCollection.insertOne(order);
+      res.send(result)
+    })
+
+    // User Ordering-Data
+    app.get("/order", async (req, res) => {
+      const result = await orderCollection.find().toArray()
+      res.send(result)
+    })
+
+    // Order Data Delete Normal User
+    app.delete('/order/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(filter);
+      res.send(result);
+    })
+
+    // Reviews Get
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollection.find().toArray()
+      res.send(result)
+    })
+
+    // Post Reviews
+    app.post("/review", async (req, res) => {
+      const reviews = req.body;
+      const result = await reviewCollection.insertOne(reviews);
+      res.send(result)
+    })
+
+
+    // Profile Update
+    app.post("/profile", async (req, res) => {
+      const user = req.body;
+      const result = await profileCollection.insertOne(user);
       res.send(result)
     })
 
