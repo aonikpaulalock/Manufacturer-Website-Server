@@ -2,7 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
 const app = express()
-// const jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 4000
 // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -45,7 +45,7 @@ async function run() {
     const orderCollection = client.db('Manufacturer').collection('orders');
     const reviewCollection = client.db('Manufacturer').collection('reviews');
     const profileCollection = client.db('Manufacturer').collection('profiles');
-    // const userCollection = client.db('toolsMenu').collection('users');
+    const userCollection = client.db('Manufacturer').collection('users');
     // const paymentCollection = client.db('toolsMenu').collection('payments');
     // Verify Admin
 
@@ -106,6 +106,21 @@ async function run() {
       res.send(tools);
     })
 
+    // Add Users
+    app.post("/tools", async (req, res) => {
+      const tools = req.body;
+      const result = await toolsCollection.insertOne(tools)
+      res.send(result)
+    })
+
+
+    // Delete Manage Product
+    app.delete('/tool/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await toolsCollection.deleteOne(filter);
+      res.send(result);
+    })
 
     // User Order Data
     app.post("/orders", async (req, res) => {
@@ -115,8 +130,17 @@ async function run() {
       res.send(result)
     })
 
-    // User Ordering-Data
+    // User Ordering-Data per User
     app.get("/order", async (req, res) => {
+      const email = req.query.email;
+      const filter = { email: email }
+      const cursor = orderCollection.find(filter);
+      const result = await cursor.toArray()
+      res.send(result);
+    })
+
+    // Load All User Aded Order
+    app.get("/orders", async (req, res) => {
       const result = await orderCollection.find().toArray()
       res.send(result)
     })
@@ -149,6 +173,55 @@ async function run() {
       const result = await profileCollection.insertOne(user);
       res.send(result)
     })
+
+
+    // Create User 
+    app.put("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      console.log(user);
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      // const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN)
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result)
+    })
+
+
+    //  Click Admin Button And Create admin
+    app.put('/user/admin/:email', async (req, res) => {
+      const userEmail = req.params.email;
+      console.log(userEmail)
+      const filter = { email: userEmail };
+      console.log(filter);
+      const updateDoc = {
+        $set: { role: "admin" }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
+    // Admin or Not
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const user = await userCollection.findOne(filter);
+      const isAdmin = user.role === 'admin';
+      res.send({ admin: isAdmin })
+    })
+
+
+    // Load All Users
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray()
+      res.send(result)
+    })
+
+
+
 
     // // Add Users
     // app.post("/tools", async (req, res) => {
