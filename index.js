@@ -5,7 +5,7 @@ const app = express()
 var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 4000
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Middletare
 app.use(cors());
@@ -46,7 +46,8 @@ async function run() {
     const reviewCollection = client.db('Manufacturer').collection('reviews');
     const profileCollection = client.db('Manufacturer').collection('profiles');
     const userCollection = client.db('Manufacturer').collection('users');
-    // const paymentCollection = client.db('toolsMenu').collection('payments');
+    const blogsCollection = client.db('Manufacturer').collection('blogs');
+    const paymentCollection = client.db('Manufacturer').collection('payments');
     // Verify Admin
 
     //   const verifyAdmin = async (req, res, next) => {
@@ -91,6 +92,37 @@ async function run() {
     //   res.send(updatedOrder);
     // })
 
+
+         // Payment Api and Verify
+      app.post('/create-payment-intent', async (req, res) => {
+        const service = req.body;
+        const price = service.price;
+        const amount = price * 100;
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: 'usd',
+          payment_method_types: ['card']
+        });
+        res.send({ clientSecret: paymentIntent.client_secret })
+      });
+
+
+      // Upadate Payment
+    app.patch('/orders/:id', async(req, res) =>{
+      const id  = req.params.id;
+      const payment = req.body;
+      const filter = {_id: ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId
+        }
+      }
+
+      const result = await paymentCollection.insertOne(payment);
+      const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+      res.send(updatedOrder);
+    })
 
     // Get All Tools
     app.get("/tools", async (req, res) => {
@@ -152,6 +184,14 @@ async function run() {
       const result = await orderCollection.deleteOne(filter);
       res.send(result);
     })
+
+// Payment Order Data
+app.get('/order/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: ObjectId(id) };
+  const result = await orderCollection.findOne(filter);
+  res.send(result);
+})
 
     // Reviews Get
     app.get("/reviews", async (req, res) => {
@@ -218,6 +258,19 @@ async function run() {
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray()
       res.send(result)
+    })
+
+
+    // Load All Blogs
+    app.get("/blogs", async (req, res) => {
+      const result = await blogsCollection.find().toArray();
+      res.send(result)
+    })
+    app.get("/blog/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const blogs = await blogsCollection.findOne(filter);
+      res.send(blogs);
     })
 
 
