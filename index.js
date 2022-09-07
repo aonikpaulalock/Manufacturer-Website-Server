@@ -19,9 +19,9 @@ const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@c
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function run() {
+async function run() {
   try {
-    client.connect()
+    await client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
     const orderCollection = client.db('Manufacturer').collection('orders');
     const reviewCollection = client.db('Manufacturer').collection('reviews');
