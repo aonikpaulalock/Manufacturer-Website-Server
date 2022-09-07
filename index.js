@@ -168,17 +168,16 @@ async function run() {
 
 
     //  Click Admin Button And Create admin
-    app.put('/user/admin/:email', async (req, res) => {
-      const userEmail = req.params.email;
-      console.log(userEmail)
-      const filter = { email: userEmail };
-      console.log(filter);
-      const updateDoc = {
-        $set: { role: "admin" }
-      }
-      const result = await userCollection.updateOne(filter, updateDoc)
-      res.send(result)
-    });
+    // app.put('/user/admin/:email', async (req, res) => {
+    //   const email = req.params.email;
+    //   const filter = { email: email };
+    //   console.log(filter);
+    //   const updateDoc = {
+    //     $set: { role: "admin" }
+    //   }
+    //   const result = await userCollection.updateOne(filter, updateDoc)
+    //   res.send(result)
+    // });
 
     // Admin or Not
     app.get("/user/:email", async (req, res) => {
