@@ -3,9 +3,9 @@ const express = require('express')
 const cors = require('cors');
 const app = express()
 const jwt = require('jsonwebtoken');
-require('dotenv').config()
 const port = process.env.PORT || 4000
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+require('dotenv').config()
 
 // Middletare
 app.use(cors());
@@ -21,9 +21,9 @@ app.get('/', (req, res) => {
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.xaykuto.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function run() {
+async function run() {
   try {
-     client.connect()
+     await client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
     const orderCollection = client.db('Manufacturer').collection('orders');
     const reviewCollection = client.db('Manufacturer').collection('reviews');
