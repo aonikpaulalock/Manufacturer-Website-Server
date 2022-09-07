@@ -1,8 +1,8 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
-const app = express() ;
-const port = process.env.PORT  ||  4000 ;
+const app = express();
+const port = process.env.PORT || 4000;
 require('dotenv').config();
 // const jwt = require('jsonwebtoken');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -20,7 +20,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
   try {
-     await client.connect()
+    await client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
     const orderCollection = client.db('Manufacturer').collection('orders');
     const reviewCollection = client.db('Manufacturer').collection('reviews');
@@ -29,25 +29,25 @@ async function run() {
     const blogsCollection = client.db('Manufacturer').collection('blogs');
     const paymentCollection = client.db('Manufacturer').collection('payments');
 
-   // Payment Api and Verify
-      app.post('/create-payment-intent', async (req, res) => {
-        const service = req.body;
-        const price = service.price;
-        const amount = price * 100;
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: amount,
-          currency: 'usd',
-          payment_method_types: ['card']
-        });
-        res.send({ clientSecret: paymentIntent.client_secret })
+    // Payment Api and Verify
+    app.post("/create-payment-intent", async (req, res) => {
+      const service = req.body;
+      const price = service.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
       });
+      res.send({ clientSecret: paymentIntent.client_secret })
+    });
 
 
-      // Upadate Payment
-    app.patch('/orders/:id', async(req, res) =>{
-      const id  = req.params.id;
+    // Upadate Payment
+    app.patch("/orders/:id", async (req, res) => {
+      const id = req.params.id;
       const payment = req.body;
-      const filter = {_id: ObjectId(id)};
+      const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
           paid: true,
@@ -83,7 +83,7 @@ async function run() {
 
 
     // Delete Manage Product
-    app.delete('/tool/:id', async (req, res) => {
+    app.delete("/tool/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await toolsCollection.deleteOne(filter);
@@ -114,20 +114,20 @@ async function run() {
     });
 
     // Order Data Delete Normal User
-    app.delete('/order/:id', async (req, res) => {
+    app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(filter);
       res.send(result);
     });
 
-// Payment Order Data
-app.get('/order/:id', async (req, res) => {
-  const id = req.params.id;
-  const filter = { _id: ObjectId(id) };
-  const result = await orderCollection.findOne(filter);
-  res.send(result);
-});
+    // Payment Order Data
+    app.get("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await orderCollection.findOne(filter);
+      res.send(result);
+    });
 
     // Reviews Get
     app.get("/reviews", async (req, res) => {
