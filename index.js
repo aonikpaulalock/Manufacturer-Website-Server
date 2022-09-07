@@ -2,7 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
 const app = express()
-// var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 4000
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -21,9 +21,9 @@ app.get('/', (req, res) => {
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.xaykuto.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-async function run() {
+function run() {
   try {
-    await client.connect()
+     client.connect()
     const toolsCollection = client.db('Manufacturer').collection('tools');
     const orderCollection = client.db('Manufacturer').collection('orders');
     const reviewCollection = client.db('Manufacturer').collection('reviews');
@@ -158,7 +158,6 @@ app.get('/order/:id', async (req, res) => {
     app.put("/users/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
-      console.log(user);
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
